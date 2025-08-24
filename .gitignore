@@ -1,0 +1,10 @@
+/.metadata/
+/target/
+/.settings/
+/.classpath
+/.project
+/.vscode/
+/.idea/
+/*.iml
+*.log
+.DS_Store

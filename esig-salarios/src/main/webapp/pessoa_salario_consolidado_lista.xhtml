@@ -1,0 +1,251 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:f="http://xmlns.jcp.org/jsf/core" template="/template.xhtml">
+
+	<ui:define name="content">
+
+		<h:form id="form">
+
+			<p:growl id="mensagem" showDetail="true" autoUpdate="true" />
+
+			<p:panel header="Listagem de Pessoas">
+			
+				<p:commandButton id="btnCalcular" value="#{pessoaListaView.botaoCalcular}"
+					action="#{pessoaListaView.calcularSalarios}"
+					styleClass="btn btn-primary" update="mensagem btnCalcular"
+					oncomplete="PF('pollSalario').start()"
+					disabled="#{pessoaListaView.emProcessamento}" />
+
+				<p:commandButton value="Nova Pessoa"
+					actionListener="#{pessoaListaView.novaPessoa}"
+					styleClass="btn btn-primary" update="pessoaDialogForm:pessoaDialog"
+					oncomplete="PF('pessoaDialog').show()" />
+					
+				<!-- Poll que consulta se terminou -->
+			    <p:poll widgetVar="pollSalario" interval="5"
+			            update="tabelaPessoas mensagem btnCalcular"
+			            autoStart="false"
+			            listener="#{pessoaListaView.verificarProcessamento}"
+			            stop="#{not pessoaListaView.emProcessamento}" />
+
+				<br />
+				<br />
+
+				<p:dataTable id="tabelaPessoas" var="pessoa"
+					value="#{pessoaListaView.pessoas}"
+					paginator="true"
+					rows="10"
+					rowsPerPageTemplate="10,20,50"
+					paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}">
+
+					<f:facet name="header">
+						<div>Pessoas (Cargos e Salários)</div>
+					</f:facet>
+					
+					<p:column headerText="ID" filterBy="#{pessoa.id}" sortBy="#{pessoa.id}" filterMatchMode="contains">
+						<h:outputText value="#{pessoa.id}" />
+					</p:column>
+					
+					<p:column headerText="Nome" filterBy="#{pessoa.nomePessoa}" sortBy="#{pessoa.nomePessoa}" filterMatchMode="contains">
+						<h:outputText value="#{pessoa.nomePessoa}" />
+					</p:column>
+
+					<p:column headerText="Cargo" filterBy="#{pessoa.nomeCargo}" sortBy="#{pessoa.nomeCargo}" filterMatchMode="contains">
+						<h:outputText value="#{pessoa.nomeCargo}" />
+					</p:column>
+
+					<p:column headerText="Salário" filterBy="#{pessoa.salario}" sortBy="#{pessoa.salario}" filterMatchMode="contains">
+						<h:outputText value="#{pessoa.salario}" >
+							<f:convertNumber type="currency" currencySymbol="R$ " />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="Editar">
+						<p:commandButton icon="pi pi-pencil" title="Editar"
+							actionListener="#{pessoaListaView.editarPessoa(pessoa)}"
+							update="pessoaDialogForm:pessoaDialog"
+							oncomplete="PF('pessoaDialog').show()" />
+					</p:column>
+
+					<p:column headerText="Excluir">
+						<p:commandButton icon="pi pi-trash" title="Excluir" update=":form"
+							process="@this" oncomplete="PF('confirmDialog').show()">
+							<f:setPropertyActionListener target="#{pessoaListaView.pessoa}"
+								value="#{pessoa}" />
+						</p:commandButton>
+					</p:column>
+
+				</p:dataTable>
+			</p:panel>
+
+			<br />
+
+			
+		</h:form>
+		
+		<h:form>
+			<p:confirmDialog header="Confirmação"
+				message="Realmente deseja remover esse registro?"
+				widgetVar="confirmDialog" severity="warn" appendTo="@(body)">
+				<p:commandButton value="Sim" icon="pi pi-check"
+					action="#{pessoaListaView.excluirPessoa}"
+					update=":form:tabelaPessoas :form:mensagem"
+					oncomplete="PF('confirmDialog').hide()"
+					styleClass="ui-confirmdialog-yes" />
+				<p:commandButton value="Não" icon="pi pi-times"
+					onclick="PF('confirmDialog').hide(); return false;"
+					styleClass="ui-confirmdialog-no ui-button-secondary" />
+			</p:confirmDialog>
+		</h:form>
+
+
+		<h:form id="pessoaDialogForm">
+			<p:dialog header="Detalhes da Pessoa" widgetVar="pessoaDialog" id="pessoaDialog"
+				modal="true" appendToBody="true" resizable="false" draggable="false"
+				responsive="true">
+				<div style="max-height: 400px; overflow-y: auto;">
+				<p:panelGrid styleClass="ui-panelgrid-blank ui-fluid"
+					columnClasses="ui-g-12" layout="grid" columns="1">
+					
+					<p:column>
+						<p:outputLabel for="@next" value="Nome:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.nome}"
+							required="true" maxlength="255" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="Cidade:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.cidade}"
+							required="true" maxlength="255" />
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel for="@next" value="E-mail:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.email}"
+							required="true" maxlength="255" />
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel for="@next" value="CEP:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.cep}"
+							required="true" maxlength="255" />
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel for="@next" value="Endereço:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.endereco}"
+							required="true" maxlength="500" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="País:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.pais}"
+							required="true" maxlength="255" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="Usuário" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.usuario}"
+							required="true" maxlength="255" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="Telefone:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.telefone}"
+							required="true" maxlength="255" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="Data de Nascimento:" />
+						<p:calendar
+							value="#{pessoaListaView.pessoaSelecionada.dataNascimento}"
+							pattern="dd/MM/yyyy" navigator="true" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="Cargo:" />
+						<p:selectOneMenu value="#{pessoaListaView.pessoaSelecionada.cargo}" converter="#{cargoConverter}">
+							 <f:selectItems value="#{pessoaListaView.listaCargos}" var="cargo"
+								itemLabel="#{cargo.nome}" itemValue="#{cargo}" />
+						</p:selectOneMenu>
+					</p:column>
+				</p:panelGrid>
+				</div>
+				
+				<p:commandButton value="Criar Usuário"
+					actionListener="#{pessoaListaView.novoUsuario}"
+					update="usuarioDialogForm:usuarioDialog"
+					oncomplete="PF('usuarioDialog').show()" 
+					rendered="#{pessoaListaView.usuarioSelecionado == null}" />
+					
+				<p:commandButton value="Excluir Usuário"
+					oncomplete="PF('usuarioDialogDelete').show()" 
+					rendered="#{pessoaListaView.usuarioSelecionado != null}" />
+
+				<p:commandButton value="Salvar"
+					action="#{pessoaListaView.salvarPessoa}"
+					update=":form:tabelaPessoas :form:mensagem pessoaDialogForm:pessoaDialog"
+					oncomplete="if (!args.validationFailed) {PF('pessoaDialog').hide()}" />
+
+				<p:commandButton value="Cancelar" immediate="true"
+					onclick="PF('pessoaDialog').hide(); return false;" />
+
+			</p:dialog>
+		</h:form>
+		
+		<h:form>
+			<p:confirmDialog header="Confirmação"
+				message="Realmente deseja remover esse registro?"
+				widgetVar="usuarioDialogDelete" severity="warn" appendTo="@(body)">
+				<p:commandButton value="Sim" icon="pi pi-check"
+					action="#{pessoaListaView.excluirUsuario}"
+					update="pessoaDialogForm:pessoaDialog :form:mensagem"
+					oncomplete="PF('usuarioDialogDelete').hide()"
+					styleClass="ui-confirmdialog-yes" />
+				<p:commandButton value="Não" icon="pi pi-times"
+					onclick="PF('usuarioDialogDelete').hide(); return false;"
+					styleClass="ui-confirmdialog-no ui-button-secondary" />
+			</p:confirmDialog>
+		</h:form>
+		
+		<h:form id="usuarioDialogForm">
+			<p:dialog header="Detalhes da Usuário" widgetVar="usuarioDialog" id="usuarioDialog"
+				modal="true" appendToBody="true" resizable="false" draggable="false"
+				responsive="true">
+				<div style="max-height: 400px; overflow-y: auto;">
+				<p:panelGrid styleClass="ui-panelgrid-blank ui-fluid"
+					columnClasses="ui-g-12" layout="grid" columns="1">
+					
+					<p:column>
+						<p:outputLabel for="@next" value="Usuário:" />
+						<p:inputText value="#{pessoaListaView.pessoaSelecionada.usuario}"
+							required="true" disabled="true" maxlength="255" />
+					</p:column>
+
+					<p:column>
+						<p:outputLabel for="@next" value="Senha:" />
+						<p:inputText value="#{pessoaListaView.senha}"
+							required="true" maxlength="255" />
+					</p:column>
+				</p:panelGrid>
+				</div>
+
+				<p:commandButton value="Salvar"
+					action="#{pessoaListaView.salvarUsuario}"
+					update="pessoaDialogForm:pessoaDialog"
+					oncomplete="if (!args.validationFailed) {PF('usuarioDialog').hide()}" />
+
+				<p:commandButton value="Cancelar" immediate="true"
+					onclick="PF('usuarioDialog').hide(); return false;" />
+
+			</p:dialog>
+		</h:form>
+
+
+	</ui:define>
+
+
+</ui:composition>
+

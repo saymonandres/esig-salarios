@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: postgres:15
+    container_name: esig-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: esig_test
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/1_schema.sql
+      - ./db/csv/:/docker-entrypoint-initdb.d/csv/
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: esig-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+
+  wildfly:
+    image: quay.io/wildfly/wildfly:32.0.0.Final-jdk17
+    container_name: esig-wildfly
+    ports:
+      - "8080:8080"
+      - "9990:9990"   # console admin
+    volumes:
+      - ./target/esig-salarios.war:/opt/jboss/wildfly/standalone/deployments/esig-salarios.war
+    depends_on:
+      - postgres

@@ -1,0 +1,19 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+		xmlns:h="http://xmlns.jcp.org/jsf/html"
+		xmlns:p="http://primefaces.org/ui"
+		xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+
+	<div class="topbar">
+		<div class="logo">
+			<p:graphicImage name="logo.webp" library="images" />
+		</div>
+		
+		<div class="usuario">
+			<h:form style="margin-left: auto;">
+	            <p:outputLabel value="Bem-vindo, #{authView.usuarioLogado.pessoa.nome}" style="margin-right: 15px; text-decoration: none; color: #000000;"/>
+	            <p:commandButton value="Sair" action="#{authView.doLogout}" icon="pi pi-sign-out" styleClass="p-button-danger"/>
+	        </h:form>
+        </div>
+	</div>
+	
+</ui:composition>
