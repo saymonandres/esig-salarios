@@ -45,3 +45,6 @@ O WildFly detectará automaticamente e fará o deploy.
 
 ### 5. Acessar aplicação
 http://localhost:8080/esig-salarios/
+Login:
+- User: Cousine
+- Password: admin
